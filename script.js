@@ -1,7 +1,7 @@
 // --- CONFIG ---
 const CFG = { gravity: 0.4, drag: 0.99, spring: 0.08, thruster: 0.4, maxSpeed: 24, startSpeed: 6, maxTetherLen: 600 };
 
-// --- DATA: Store Items ---
+// --- DATA ---
 const StoreDB = {
     skins: [
         { id: 'skin_cyan', name: 'Cyan Core', cost: 0, color: '#0ff' },
@@ -26,11 +26,30 @@ const StoreDB = {
 
 // --- SAVE SYSTEM ---
 const SaveSystem = {
-    data: { credits: 0, highScore: 0, totalDist: 0, unlocked: ['skin_cyan', 'trail_dust', 'bg_default'], equipped: { skin: 'skin_cyan', trail: 'trail_dust', bg: 'bg_default' } },
-    load: function() { const str = localStorage.getItem('neon_v3'); if (str) this.data = JSON.parse(str); },
-    save: function() { localStorage.setItem('neon_v3', JSON.stringify(this.data)); },
+    data: { 
+        credits: 0, highScore: 0, totalDist: 0, username: "PLAYER",
+        unlocked: ['skin_cyan', 'trail_dust', 'bg_default'], 
+        equipped: { skin: 'skin_cyan', trail: 'trail_dust', bg: 'bg_default' },
+        leaderboard: [] // Array of {name, score}
+    },
+    load: function() { 
+        const str = localStorage.getItem('neon_v4'); 
+        if (str) {
+            const loaded = JSON.parse(str);
+            this.data = { ...this.data, ...loaded }; // Merge to ensure new fields like leaderboard exist
+        }
+    },
+    save: function() { localStorage.setItem('neon_v4', JSON.stringify(this.data)); },
+    
     unlock: function(id, cost) { if (this.data.credits >= cost && !this.data.unlocked.includes(id)) { this.data.credits -= cost; this.data.unlocked.push(id); this.save(); return true; } return false; },
-    equip: function(type, id) { if (this.data.unlocked.includes(id)) { this.data.equipped[type] = id; this.save(); } }
+    equip: function(type, id) { if (this.data.unlocked.includes(id)) { this.data.equipped[type] = id; this.save(); } },
+    
+    updateLeaderboard: function(score) {
+        this.data.leaderboard.push({ name: this.data.username, score: score });
+        this.data.leaderboard.sort((a, b) => b.score - a.score);
+        this.data.leaderboard = this.data.leaderboard.slice(0, 5); // Keep top 5
+        this.save();
+    }
 };
 
 // --- DEV TOOLS ---
@@ -55,12 +74,7 @@ const DevTools = {
             document.getElementById('admin-pass').value = '';
         }
     },
-    toggleGod: function() {
-        game.godMode = !game.godMode;
-        const btn = document.getElementById('btn-god');
-        btn.innerText = game.godMode ? "GOD MODE: ON" : "GOD MODE: OFF";
-        btn.classList.toggle('active');
-    },
+    toggleGod: function() { game.godMode = !game.godMode; document.getElementById('btn-god').innerText = game.godMode ? "GOD MODE: ON" : "GOD MODE: OFF"; document.getElementById('btn-god').classList.toggle('active'); },
     addMoney: function() { SaveSystem.data.credits += 50000; SaveSystem.save(); UI.home(); },
     unlockAll: function() {
         StoreDB.skins.forEach(i => { if(!SaveSystem.data.unlocked.includes(i.id)) SaveSystem.data.unlocked.push(i.id); });
@@ -69,12 +83,8 @@ const DevTools = {
         SaveSystem.save(); alert("UNLOCKED ALL");
     },
     speedUp: function() { game.player.vx += 20; CFG.maxSpeed = Math.max(CFG.maxSpeed, game.player.vx); },
-    toggleGrav: function() {
-        if(CFG.gravity > 0) { CFG.gravity = 0; document.getElementById('btn-grav').innerText = "GRAVITY: OFF"; }
-        else { CFG.gravity = 0.4; document.getElementById('btn-grav').innerText = "GRAVITY: ON"; }
-        document.getElementById('btn-grav').classList.toggle('active');
-    },
-    wipeSave: function() { if(confirm("NUKE SAVE DATA?")) { localStorage.removeItem('neon_v3'); location.reload(); } }
+    toggleGrav: function() { if(CFG.gravity > 0) { CFG.gravity = 0; document.getElementById('btn-grav').innerText = "GRAVITY: OFF"; } else { CFG.gravity = 0.4; document.getElementById('btn-grav').innerText = "GRAVITY: ON"; } document.getElementById('btn-grav').classList.toggle('active'); },
+    wipeSave: function() { if(confirm("NUKE SAVE DATA?")) { localStorage.removeItem('neon_v4'); location.reload(); } }
 };
 
 // --- AUDIO ---
@@ -91,9 +101,37 @@ const AudioSys = {
 // --- UI ---
 const UI = {
     toggle: (id) => { document.querySelectorAll('.menu-screen').forEach(el => el.classList.remove('active')); document.getElementById('hud').style.display = 'none'; if(id) document.getElementById(id).classList.add('active'); },
-    home: () => { SaveSystem.load(); document.getElementById('menu-credits').innerText = SaveSystem.data.credits; document.getElementById('menu-high').innerText = SaveSystem.data.highScore + 'm'; UI.toggle('screen-start'); },
+    
+    home: () => { 
+        SaveSystem.load(); 
+        document.getElementById('menu-credits').innerText = SaveSystem.data.credits; 
+        document.getElementById('menu-high').innerText = SaveSystem.data.highScore + 'm'; 
+        document.getElementById('player-name').value = SaveSystem.data.username;
+        UI.toggle('screen-start'); 
+    },
+    
     showHelp: () => UI.toggle('screen-help'),
     showStore: () => { UI.toggle('screen-store'); UI.renderStore(); },
+    
+    showLeaderboard: () => {
+        UI.toggle('screen-leaderboard');
+        const container = document.getElementById('leaderboard-content');
+        container.innerHTML = '';
+        const data = SaveSystem.data.leaderboard;
+        if(data.length === 0) {
+            container.innerHTML = '<p style="color:#666">NO RECORDS YET</p>';
+        } else {
+            data.forEach((entry, i) => {
+                container.innerHTML += `
+                    <div class="lb-row">
+                        <div class="lb-rank">#${i+1}</div>
+                        <div class="lb-name">${entry.name}</div>
+                        <div class="lb-score">${entry.score}m</div>
+                    </div>`;
+            });
+        }
+    },
+
     renderStore: () => {
         document.getElementById('store-credits').innerText = SaveSystem.data.credits; const container = document.getElementById('store-content'); container.innerHTML = '';
         const render = (title, items, type) => {
@@ -107,6 +145,7 @@ const UI = {
         };
         render('SKINS', StoreDB.skins, 'skin'); render('TRAILS', StoreDB.trails, 'trail'); render('BACKGROUNDS', StoreDB.bgs, 'bg');
     },
+    
     clickItem: (type, id, cost) => { if (SaveSystem.data.unlocked.includes(id)) { SaveSystem.equip(type, id); AudioSys.play('hook'); } else { if (SaveSystem.unlock(id, cost)) { SaveSystem.equip(type, id); AudioSys.play('buy'); } } UI.renderStore(); }
 };
 
@@ -122,35 +161,40 @@ const game = {
         DevTools.initListeners();
         
         // --- INPUT HANDLING ---
-        const inputActive = (e) => { 
-            // Avoid triggering swing if clicking buttons or inputs
-            if(e && e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        const startSwing = (e) => { 
+            // Avoid triggering if clicking UI elements (Inputs, Buttons)
+            if(e && (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT')) return;
             
+            // Save Username change if modified
+            const nameInput = document.getElementById('player-name').value.toUpperCase().trim();
+            if(nameInput && nameInput !== SaveSystem.data.username) {
+                SaveSystem.data.username = nameInput || "PLAYER";
+                SaveSystem.save();
+            }
+
             if (this.state === 'READY') { this.state = 'PLAY'; this.player.vx = CFG.startSpeed; AudioSys.play('hook'); return; }
             if (this.state === 'PLAY') { this.inputs.active = true; this.tryTether(); } 
         };
-        const inputEnd = () => { this.inputs.active = false; this.releaseTether(); };
+        const stopSwing = () => { this.inputs.active = false; this.releaseTether(); };
 
-        // Keyboard
+        // Keyboard (Spacebar Priority)
         window.addEventListener('keydown', e => { 
-            if(e.code==='Space') { e.preventDefault(); inputActive(); }
+            if(e.code==='Space') { e.preventDefault(); startSwing(); }
             if(e.code==='ArrowLeft') this.inputs.left=true; if(e.code==='ArrowRight') this.inputs.right=true; 
             if(e.code==='ArrowUp') this.inputs.up=true; if(e.code==='ArrowDown') this.inputs.down=true; 
         });
         window.addEventListener('keyup', e => { 
-            if(e.code==='Space') inputEnd();
+            if(e.code==='Space') stopSwing();
             if(e.code==='ArrowLeft') this.inputs.left=false; if(e.code==='ArrowRight') this.inputs.right=false;
             if(e.code==='ArrowUp') this.inputs.up=false; if(e.code==='ArrowDown') this.inputs.down=false; 
         });
         
-        // Global Touch/Mouse (Swing)
-        window.addEventListener('mousedown', inputActive); window.addEventListener('touchstart', (e)=>{ if(e.target.tagName!=='BUTTON') e.preventDefault(); inputActive(e); }, {passive:false});
-        window.addEventListener('mouseup', inputEnd); window.addEventListener('touchend', inputEnd);
+        // Mouse/Touch (Fallback)
+        window.addEventListener('mousedown', startSwing); window.addEventListener('touchstart', (e)=>{ if(e.target.tagName!=='BUTTON') e.preventDefault(); startSwing(e); }, {passive:false});
+        window.addEventListener('mouseup', stopSwing); window.addEventListener('touchend', stopSwing);
 
-        // Mobile Buttons (Steering)
-        const btnLeft = document.getElementById('btn-left');
-        const btnRight = document.getElementById('btn-right');
-        
+        // Mobile Buttons
+        const btnLeft = document.getElementById('btn-left'); const btnRight = document.getElementById('btn-right');
         const touchStartLeft = (e) => { e.stopPropagation(); this.inputs.left = true; };
         const touchEndLeft = (e) => { e.stopPropagation(); this.inputs.left = false; };
         const touchStartRight = (e) => { e.stopPropagation(); this.inputs.right = true; };
@@ -164,7 +208,16 @@ const game = {
         UI.home(); this.loop();
     },
     resize: function() { this.width = canvas.width = window.innerWidth; this.height = canvas.height = window.innerHeight; },
-    start: function() { AudioSys.init(); this.applyCustomization(); this.state = 'READY'; this.reset(); document.getElementById('hud').style.display = 'flex'; document.querySelectorAll('.menu-screen').forEach(el => el.classList.remove('active')); },
+    start: function() { 
+        // Save Name before starting
+        const nameInput = document.getElementById('player-name').value.toUpperCase().trim();
+        SaveSystem.data.username = nameInput || "PLAYER";
+        SaveSystem.save();
+
+        AudioSys.init(); this.applyCustomization(); this.state = 'READY'; this.reset(); 
+        document.getElementById('hud').style.display = 'flex'; 
+        document.querySelectorAll('.menu-screen').forEach(el => el.classList.remove('active')); 
+    },
     applyCustomization: function() { const eq = SaveSystem.data.equipped; const skin = StoreDB.skins.find(s=>s.id===eq.skin); const bg = StoreDB.bgs.find(b=>b.id===eq.bg); const trail = StoreDB.trails.find(t=>t.id===eq.trail); this.skinColor=skin?skin.color:'#0ff'; this.bgColor=bg?bg.color:'#050505'; this.trailType=trail?trail:{type:'circle',color:null}; },
     reset: function() { this.player = { x: 200, y: this.height/2, vx: 0, vy: 0, r: 8, tether: null }; this.anchors = []; this.particles = []; this.cameraX = 0; this.score = 0; this.frameCount = 0; this.godMode = false; for(let i=0; i<20; i++) this.spawnChunk(300 + i*350); },
     spawnChunk: function(x) { this.anchors.push({ x: x, y: this.height * 0.2 + Math.random() * (this.height * 0.6) }); },
@@ -175,12 +228,7 @@ const game = {
     update: function() {
         this.frameCount++; if (this.state === 'READY') { this.player.y = (this.height/2) + Math.sin(this.frameCount * 0.05) * 5; return; } if (this.state !== 'PLAY') return;
         const p = this.player;
-        
-        if (this.godMode) {
-            p.vx = 0; p.vy = 0;
-            if(this.inputs.right) p.x += 15; if(this.inputs.left) p.x -= 15;
-            if(this.inputs.up) p.y -= 15; if(this.inputs.down) p.y += 15;
-        } 
+        if (this.godMode) { p.vx = 0; p.vy = 0; if(this.inputs.right) p.x += 15; if(this.inputs.left) p.x -= 15; if(this.inputs.up) p.y -= 15; if(this.inputs.down) p.y += 15; } 
         else {
             p.vy += CFG.gravity; p.vx *= CFG.drag; p.vy *= CFG.drag;
             if (this.inputs.right) { p.vx += CFG.thruster; this.spawnParticle(p.x, p.y, -1); } 
@@ -189,15 +237,21 @@ const game = {
             const speed = Math.hypot(p.vx, p.vy); if (speed > CFG.maxSpeed) { p.vx *= (CFG.maxSpeed/speed); p.vy *= (CFG.maxSpeed/speed); }
             p.x += p.vx; p.y += p.vy;
         }
-
         this.cameraX += ((p.x - this.width*0.3) - this.cameraX) * 0.1;
         if (this.anchors[this.anchors.length-1].x < this.cameraX + this.width + 800) this.spawnChunk(this.anchors[this.anchors.length-1].x + 300 + Math.random()*200); if (this.anchors.length > 30) this.anchors.shift();
-        
         if (!this.godMode && (p.y > this.height + 200 || p.y < -200)) this.gameOver();
-
         this.score = Math.floor(p.x / 100); document.getElementById('hud-dist').innerText = this.score + "m"; document.getElementById('hud-creds').innerText = this.score; this.updateParticles();
     },
-    gameOver: function() { this.state = 'OVER'; AudioSys.play('crash'); SaveSystem.data.credits += this.score; SaveSystem.data.totalDist += this.score; if (this.score > SaveSystem.data.highScore) SaveSystem.data.highScore = this.score; SaveSystem.save(); document.getElementById('end-dist').innerText = this.score + "m"; document.getElementById('end-loot').innerText = this.score; UI.toggle('screen-over'); },
+    gameOver: function() { 
+        this.state = 'OVER'; AudioSys.play('crash'); 
+        SaveSystem.data.credits += this.score; 
+        SaveSystem.data.totalDist += this.score; 
+        if (this.score > SaveSystem.data.highScore) SaveSystem.data.highScore = this.score; 
+        SaveSystem.updateLeaderboard(this.score); // Save to leaderboard
+        document.getElementById('end-dist').innerText = this.score + "m"; 
+        document.getElementById('end-loot').innerText = this.score; 
+        UI.toggle('screen-over'); 
+    },
     spawnParticle: function(x, y, dirX) { const t = this.trailType; let color = t.color || (Math.random()>0.5 ? '#0ff' : '#f0f'); if (t.type === 'rainbow') color = `hsl(${Math.random()*360}, 100%, 50%)`; this.particles.push({ x: x, y: y, vx: dirX * (Math.random()*5) + (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3, life: 1.0, color: color, size: Math.random()*4, type: t.type }); },
     updateParticles: function() { this.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= 0.05; }); this.particles = this.particles.filter(p => p.life > 0); },
     draw: function() {
