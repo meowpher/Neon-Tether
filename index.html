@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Tether: Spacebar Edition</title>
+    <title>Neon Tether: Mobile Ready</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -56,11 +56,11 @@
             <h2>MANUAL</h2>
             <div class="tutorial-box">
                 <p>1. <strong>AIM:</strong> Look for the <strong>White Target</strong>.</p>
-                <p>2. <strong>SWING:</strong> Hold <span class="key" style="width: 50px;">SPACE</span> to attach.</p>
-                <p>3. <strong>FLY:</strong> Release <span class="key" style="width: 50px;">SPACE</span> to launch.</p>
-                <p>4. <strong>STEER:</strong> <span class="key">←</span> <span class="key">→</span> to boost.</p>
+                <p>2. <strong>SWING:</strong> Hold <span class="key">SPACE</span> or Tap Screen.</p>
+                <p>3. <strong>FLY:</strong> Release to launch.</p>
+                <p>4. <strong>STEER:</strong> Use Arrows or Mobile Buttons.</p>
                 <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <p style="color: #666; font-size: 10px;">DEV HINT: Hover top-right corner.</p>
+                <p style="color: #666; font-size: 10px;">DEV HINT: Top-right corner.</p>
             </div>
             <button class="btn primary" onclick="game.start()">ENGAGE</button>
             <button class="btn" onclick="UI.home()">BACK</button>
@@ -77,8 +77,12 @@
 
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <div id="mobile-controls">
+        <button id="btn-left" class="touch-btn">❮</button>
+        <button id="btn-right" class="touch-btn">❯</button>
+    </div>
 
+    <canvas id="gameCanvas"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
