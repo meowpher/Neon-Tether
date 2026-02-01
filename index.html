@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Neon Tether: Spacebar Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="dev-login-area">
+        <input type="password" id="admin-pass" placeholder="LOGIN">
+    </div>
+
+    <div id="dev-panel">
+        <div class="dev-title">:: SYSTEM OVERRIDE ::</div>
+        <button class="dev-btn" id="btn-god">GOD MODE: OFF</button>
+        <button class="dev-btn" id="btn-money">+50,000 CREDITS</button>
+        <button class="dev-btn" id="btn-unlock">UNLOCK STORE</button>
+        <button class="dev-btn" id="btn-speed">SPEED ++</button>
+        <button class="dev-btn" id="btn-grav">GRAVITY: ON</button>
+        <button class="dev-btn danger" id="btn-wipe">NUKE SAVE DATA</button>
+    </div>
+
+    <div id="hud">
+        <div class="hud-panel">
+            <div class="hud-label">DISTANCE</div>
+            <div class="hud-value" id="hud-dist">0m</div>
+        </div>
+        <div class="hud-panel">
+            <div class="hud-label">CREDITS</div>
+            <div class="hud-value creds" id="hud-creds">0</div>
+        </div>
+    </div>
+
+    <div id="ui-layer">
+        
+        <div id="screen-start" class="menu-screen active">
+            <h1>NEON TETHER</h1>
+            <h2>SYSTEM READY</h2>
+            <div class="stat-row"><span class="stat-label">TOTAL CREDITS</span><span class="stat-val gold" id="menu-credits">0</span></div>
+            <div class="stat-row"><span class="stat-label">HIGH SCORE</span><span class="stat-val" id="menu-high">0m</span></div>
+            <button class="btn primary" onclick="game.start()">INITIATE RUN</button>
+            <button class="btn" onclick="UI.showStore()">BLACK MARKET</button>
+            <button class="btn" onclick="UI.showHelp()">HOW TO PLAY</button>
+        </div>
+
+        <div id="screen-store" class="menu-screen">
+            <h2>BLACK MARKET</h2>
+            <div class="stat-row"><span class="stat-label">BALANCE</span><span class="stat-val gold" id="store-credits">0</span></div>
+            <div id="store-content"></div>
+            <button class="btn" onclick="UI.home()">BACK</button>
+        </div>
+
+        <div id="screen-help" class="menu-screen">
+            <h2>MANUAL</h2>
+            <div class="tutorial-box">
+                <p>1. <strong>AIM:</strong> Look for the <strong>White Target</strong>.</p>
+                <p>2. <strong>SWING:</strong> Hold <span class="key" style="width: 50px;">SPACE</span> to attach.</p>
+                <p>3. <strong>FLY:</strong> Release <span class="key" style="width: 50px;">SPACE</span> to launch.</p>
+                <p>4. <strong>STEER:</strong> <span class="key">←</span> <span class="key">→</span> to boost.</p>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+                <p style="color: #666; font-size: 10px;">DEV HINT: Hover top-right corner.</p>
+            </div>
+            <button class="btn primary" onclick="game.start()">ENGAGE</button>
+            <button class="btn" onclick="UI.home()">BACK</button>
+        </div>
+
+        <div id="screen-over" class="menu-screen">
+            <h1 style="color:#f05">CRITICAL FAIL</h1>
+            <div class="stat-row"><span class="stat-label">DISTANCE</span><span class="stat-val" id="end-dist">0m</span></div>
+            <div class="stat-row"><span class="stat-label">EARNINGS</span><span class="stat-val gold" id="end-loot">0</span></div>
+            <button class="btn primary" onclick="game.start()">RETRY</button>
+            <button class="btn" onclick="UI.showStore()">STORE</button>
+            <button class="btn" onclick="UI.home()">MENU</button>
+        </div>
+
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>

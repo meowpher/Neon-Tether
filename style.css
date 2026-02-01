@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;900&display=swap');
+
+body {
+    margin: 0; overflow: hidden; background-color: #050505;
+    font-family: 'Orbitron', sans-serif; touch-action: none; user-select: none;
+}
+canvas { display: block; }
+
+/* --- DEV LOGIN --- */
+#dev-login-area {
+    position: absolute; top: 0; right: 0; width: 120px; height: 40px;
+    opacity: 0; z-index: 1000; transition: opacity 0.3s;
+}
+#dev-login-area:hover, #dev-login-area:focus-within { opacity: 1; }
+#admin-pass {
+    width: 100%; height: 100%; background: #000; color: #0f0;
+    border: 1px solid #0f0; font-family: monospace; padding: 5px;
+    box-sizing: border-box; outline: none; text-align: center;
+}
+
+/* --- DEV PANEL --- */
+#dev-panel {
+    position: absolute; top: 50px; right: 10px; width: 180px;
+    background: rgba(0, 20, 0, 0.9); border: 1px solid #0f0;
+    padding: 10px; border-radius: 5px; display: none;
+    z-index: 1000; box-shadow: 0 0 20px #0f0;
+}
+.dev-title { color: #0f0; font-size: 12px; text-align: center; margin-bottom: 10px; border-bottom: 1px solid #0f0; }
+.dev-btn {
+    width: 100%; margin-bottom: 5px; padding: 8px;
+    background: #000; border: 1px solid #0a0; color: #0f0;
+    font-family: 'Orbitron'; font-size: 10px; cursor: pointer;
+    text-transform: uppercase; transition: 0.1s;
+}
+.dev-btn:hover { background: #0f0; color: #000; }
+.dev-btn.active { background: #0f0; color: #000; font-weight: bold; }
+.dev-btn.danger { border-color: #f00; color: #f00; }
+.dev-btn.danger:hover { background: #f00; color: #000; }
+
+/* --- UI LAYOUT --- */
+#ui-layer {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* HUD */
+#hud {
+    position: absolute; top: 0; left: 0; width: 100%;
+    padding: 20px; box-sizing: border-box;
+    display: flex; justify-content: space-between;
+    pointer-events: none;
+    display: none;
+}
+.hud-panel { text-align: center; }
+.hud-label { font-size: 12px; color: #888; letter-spacing: 2px; }
+.hud-value { font-size: 28px; color: #fff; text-shadow: 0 0 10px #fff; }
+.hud-value.creds { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
+
+/* SCREENS */
+.menu-screen {
+    pointer-events: auto; background: rgba(12, 12, 15, 0.95);
+    border: 1px solid #333; padding: 40px; width: 360px;
+    max-height: 80vh; overflow-y: auto; text-align: center;
+    border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    display: none; animation: fadeIn 0.3s ease;
+}
+.menu-screen.active { display: block; }
+
+h1 { margin: 0 0 10px; font-size: 32px; background: linear-gradient(to right, #0ff, #f0f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 4px; }
+h2 { font-size: 14px; margin-bottom: 20px; font-weight: normal; color: #888; letter-spacing: 2px; }
+
+.stat-row { display: flex; justify-content: space-between; margin: 10px 0; border-bottom: 1px solid #222; padding-bottom: 5px; }
+.stat-label { color: #666; font-size: 12px; }
+.stat-val { color: #fff; font-size: 16px; }
+.stat-val.gold { color: #ffd700; }
+
+.btn { background: transparent; width: 100%; border: 1px solid #444; color: #aaa; padding: 12px; margin-top: 8px; font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 1px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+.btn:hover { background: #222; border-color: #fff; color: #fff; }
+.btn.primary { border-color: #0ff; color: #0ff; font-weight: bold; box-shadow: 0 0 10px rgba(0,255,255,0.1); }
+.btn.primary:hover { background: #0ff; color: #000; box-shadow: 0 0 20px #0ff; }
+
+/* STORE */
+.store-section { margin-top: 20px; text-align: left; }
+.store-title { color: #fff; font-size: 12px; border-bottom: 1px solid #0ff; padding-bottom: 5px; margin-bottom: 10px; }
+.store-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.store-item { border: 1px solid #333; padding: 10px; cursor: pointer; position: relative; display: flex; flex-direction: column; align-items: center; }
+.store-item:hover { border-color: #666; }
+.store-item.owned { border-color: #444; background: #111; }
+.store-item.equipped { border-color: #0ff; box-shadow: 0 0 10px rgba(0,255,255,0.2); }
+.item-preview { width: 30px; height: 30px; border-radius: 50%; margin-bottom: 5px; }
+.item-name { font-size: 10px; color: #aaa; margin-bottom: 5px; }
+.item-cost { font-size: 10px; color: #ffd700; }
+.item-label { font-size: 9px; color: #0ff; margin-top: 2px; }
+
+/* HOW TO PLAY */
+.tutorial-box { text-align: left; color: #ccc; font-size: 12px; line-height: 1.6; }
+.key { color: #0ff; border: 1px solid #0ff; padding: 0 4px; border-radius: 3px; font-size: 10px; display: inline-block; min-width: 15px; text-align: center; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
