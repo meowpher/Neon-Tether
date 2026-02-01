@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Tether: Mobile Ready</title>
+    <title>Neon Tether: Leaderboard Update</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -37,12 +37,26 @@
         
         <div id="screen-start" class="menu-screen active">
             <h1>NEON TETHER</h1>
-            <h2>SYSTEM READY</h2>
+            
+            <div class="input-group">
+                <label>CALLSIGN</label>
+                <input type="text" id="player-name" maxlength="10" placeholder="ENTER NAME">
+            </div>
+
             <div class="stat-row"><span class="stat-label">TOTAL CREDITS</span><span class="stat-val gold" id="menu-credits">0</span></div>
             <div class="stat-row"><span class="stat-label">HIGH SCORE</span><span class="stat-val" id="menu-high">0m</span></div>
+            
             <button class="btn primary" onclick="game.start()">INITIATE RUN</button>
             <button class="btn" onclick="UI.showStore()">BLACK MARKET</button>
+            <button class="btn" onclick="UI.showLeaderboard()">LEADERBOARD</button>
             <button class="btn" onclick="UI.showHelp()">HOW TO PLAY</button>
+        </div>
+
+        <div id="screen-leaderboard" class="menu-screen">
+            <h2>LOCAL LEGENDS</h2>
+            <div id="leaderboard-content">
+                </div>
+            <button class="btn" onclick="UI.home()">BACK</button>
         </div>
 
         <div id="screen-store" class="menu-screen">
@@ -56,11 +70,9 @@
             <h2>MANUAL</h2>
             <div class="tutorial-box">
                 <p>1. <strong>AIM:</strong> Look for the <strong>White Target</strong>.</p>
-                <p>2. <strong>SWING:</strong> Hold <span class="key">SPACE</span> or Tap Screen.</p>
+                <p>2. <strong>SWING:</strong> Hold <span class="key" style="width: 50px;">SPACE</span> (Desktop) or Tap (Mobile).</p>
                 <p>3. <strong>FLY:</strong> Release to launch.</p>
-                <p>4. <strong>STEER:</strong> Use Arrows or Mobile Buttons.</p>
-                <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-                <p style="color: #666; font-size: 10px;">DEV HINT: Top-right corner.</p>
+                <p>4. <strong>STEER:</strong> <span class="key">←</span> <span class="key">→</span> or Touch Buttons.</p>
             </div>
             <button class="btn primary" onclick="game.start()">ENGAGE</button>
             <button class="btn" onclick="UI.home()">BACK</button>
@@ -71,6 +83,7 @@
             <div class="stat-row"><span class="stat-label">DISTANCE</span><span class="stat-val" id="end-dist">0m</span></div>
             <div class="stat-row"><span class="stat-label">EARNINGS</span><span class="stat-val gold" id="end-loot">0</span></div>
             <button class="btn primary" onclick="game.start()">RETRY</button>
+            <button class="btn" onclick="UI.showLeaderboard()">LEADERBOARD</button>
             <button class="btn" onclick="UI.showStore()">STORE</button>
             <button class="btn" onclick="UI.home()">MENU</button>
         </div>
