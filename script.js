@@ -121,14 +121,17 @@ const game = {
         SaveSystem.load(); this.resize(); window.addEventListener('resize', () => this.resize());
         DevTools.initListeners();
         
-        // INPUT HANDLER (SPACEBAR + TOUCH)
-        const inputActive = () => { 
-            if(document.activeElement === document.getElementById('admin-pass')) return;
+        // --- INPUT HANDLING ---
+        const inputActive = (e) => { 
+            // Avoid triggering swing if clicking buttons or inputs
+            if(e && e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+            
             if (this.state === 'READY') { this.state = 'PLAY'; this.player.vx = CFG.startSpeed; AudioSys.play('hook'); return; }
             if (this.state === 'PLAY') { this.inputs.active = true; this.tryTether(); } 
         };
         const inputEnd = () => { this.inputs.active = false; this.releaseTether(); };
 
+        // Keyboard
         window.addEventListener('keydown', e => { 
             if(e.code==='Space') { e.preventDefault(); inputActive(); }
             if(e.code==='ArrowLeft') this.inputs.left=true; if(e.code==='ArrowRight') this.inputs.right=true; 
@@ -140,8 +143,23 @@ const game = {
             if(e.code==='ArrowUp') this.inputs.up=false; if(e.code==='ArrowDown') this.inputs.down=false; 
         });
         
-        window.addEventListener('mousedown', inputActive); window.addEventListener('touchstart', (e)=>{e.preventDefault(); inputActive()}, {passive:false});
+        // Global Touch/Mouse (Swing)
+        window.addEventListener('mousedown', inputActive); window.addEventListener('touchstart', (e)=>{ if(e.target.tagName!=='BUTTON') e.preventDefault(); inputActive(e); }, {passive:false});
         window.addEventListener('mouseup', inputEnd); window.addEventListener('touchend', inputEnd);
+
+        // Mobile Buttons (Steering)
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+        
+        const touchStartLeft = (e) => { e.stopPropagation(); this.inputs.left = true; };
+        const touchEndLeft = (e) => { e.stopPropagation(); this.inputs.left = false; };
+        const touchStartRight = (e) => { e.stopPropagation(); this.inputs.right = true; };
+        const touchEndRight = (e) => { e.stopPropagation(); this.inputs.right = false; };
+
+        btnLeft.addEventListener('mousedown', touchStartLeft); btnLeft.addEventListener('touchstart', touchStartLeft);
+        btnLeft.addEventListener('mouseup', touchEndLeft); btnLeft.addEventListener('touchend', touchEndLeft);
+        btnRight.addEventListener('mousedown', touchStartRight); btnRight.addEventListener('touchstart', touchStartRight);
+        btnRight.addEventListener('mouseup', touchEndRight); btnRight.addEventListener('touchend', touchEndRight);
 
         UI.home(); this.loop();
     },
